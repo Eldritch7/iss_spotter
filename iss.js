@@ -1,5 +1,46 @@
 const request = require("request");
 
+// iss.js 
+
+/**
+ * Orchestrates multiple API requests in order to determine the next 5 upcoming ISS fly overs for the user's current location.
+ * Input:
+ *   - A callback with an error or results.
+ * Returns (via Callback):
+ *   - An error, if any (nullable)
+ *   - The fly-over times as an array (null if error):
+ *     [ { risetime: <number>, duration: <number> }, ... ]
+ */
+const nextISSTimesForMyLocation = function(callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+    fetchCoordsByIP(ip, (error, coordinates) => {
+      if (error)  {
+        callback(error, null);
+        return;
+      }
+      fetchISSFlyOverTimes(coordinates, (error, times) => {
+        if (error) {
+          callback(error, null);
+          return;
+        }
+        callback(null, times);
+      });
+    });
+  });
+};
+
+
+
+
+
+
+
+
+
 /**
  * Makes a single API request to retrieve the user's IP address.
  * Input:
@@ -49,7 +90,7 @@ const fetchCoordsByIP = function(ip, callback) {
       return;
     }
     const {latitude, longitude} = JSON.parse(body);
-    console.log(latitude);
+    //console.log(latitude);
 
     callback(null, {latitude, longitude});
   });
@@ -68,8 +109,10 @@ const fetchMyIP = function(callback) {
     }
     let data = JSON.parse(body);
     //console.log(data);
-    let ip = data['ip'];
-    //console.log(ip);
+    let ip1 = data['ip'];
+    let ip = ip1.toString();
+    //console.log(`ip`,ip, `type of`, typeof ip);
+  
     return callback(null, ip);
     
   
@@ -77,4 +120,4 @@ const fetchMyIP = function(callback) {
   // use request to fetch IP address from JSON API
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation };
