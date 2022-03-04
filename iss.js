@@ -16,6 +16,27 @@ Add the function to the object properties being exported from iss.js
 For now, it can have an empty body and do nothing
  */
 
+
+const fetchISSFlyOverTimes = function(coordinates, callback) {
+  request(`https://iss-pass.herokuapp.com/json/?lat=${coordinates.latitude}&lon=${coordinates.longitude}`, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching times for coordinates ${coordinates.latitude}, ${coordinates.longitude}: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+    const times = JSON.parse(body);
+    callback(null, times);
+    return;
+  });
+};
+
+
+
+
 const fetchCoordsByIP = function(ip, callback) {
   request(`https://api.freegeoip.app/json/${ip}?apikey=e51080d0-9b4c-11ec-afc5-17b624f19684`, (error, response, body) => {
 
@@ -56,4 +77,4 @@ const fetchMyIP = function(callback) {
   // use request to fetch IP address from JSON API
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP };
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
